@@ -31,8 +31,43 @@ void MainWindow::addColumn(int c)
     int i = columns.indexOf(d);
 
     ui->plot->addGraph();
-    ui->plot->graph(i)->setScatterStyle(QCPScatterStyle::ssCircle);
+    ui->plot->graph(i)->setScatterStyle(QCPScatterStyle::ssNone);
     ui->plot->graph(i)->setLineStyle(QCPGraph::lsLine);
+
+    QColor color;
+    switch (i % 10) {
+    case 0:
+        color = QColor(31,119,180);
+        break;
+    case 1:
+        color = QColor(255,127,14);
+        break;
+    case 2:
+        color = QColor(44,160,44);
+        break;
+    case 3:
+        color = QColor(214,39,130);
+        break;
+    case 4:
+        color = QColor(148,102,189);
+        break;
+    case 5:
+        color = QColor(140,86,75);
+        break;
+    case 6:
+        color = QColor(227,119,194);
+        break;
+    case 7:
+        color = QColor(113,127,127);
+        break;
+    case 8:
+        color = QColor(188,189,34);
+        break;
+    case 9:
+        color = QColor(23,190,207);
+        break;
+    }
+    ui->plot->graph(i)->setPen(QPen(color));
 }
 
 void MainWindow::plot()
