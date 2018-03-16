@@ -3,7 +3,7 @@
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
-    initializePlot();
+    ui->setupUi(this);
     initializeTimer();
 }
 
@@ -29,7 +29,7 @@ void MainWindow::addColumn(int c)
 
     int i = columns.indexOf(c);
     ui->plot->addGraph();
-    ui->plot->graph(i)->setScatterStyle(QCPScatterStyle::ssNone);
+    ui->plot->graph(i)->setScatterStyle(QCPScatterStyle::ssCircle);
     ui->plot->graph(i)->setLineStyle(QCPGraph::lsLine);
 }
 
@@ -75,16 +75,13 @@ void MainWindow::on_timeout()
         if (ok) {
             addPoint(i, x, y);
             plot();
-            x += 1;
         } else {
             qWarning() << "Could not understand CSV line: " << line;
         }
     }
-}
 
-void MainWindow::initializePlot()
-{
-    ui->setupUi(this);
+    qDebug() << line;
+    x += 1;
 }
 
 void MainWindow::initializeTimer()

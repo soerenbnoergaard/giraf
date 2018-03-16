@@ -44,7 +44,6 @@ private:
     // Handles
     QTextStream *inputTextStream;
 
-    void initializePlot();
     void initializeTimer();
 };
 
