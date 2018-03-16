@@ -51,33 +51,39 @@ void MainWindow::on_timeout()
     static uint32_t t = 0;
     static uint8_t y = 0;
 
+    // Read a line from the input file
     QString line;
     line = inputTextStream->readLine();
     if (line.length() == 0)
         return;
 
+    // Split the line into a row of cells
     QStringList row;
     row = line.split(delimiter);
 
+    // Add columns to the plot
     for (int i = 0; i < columns.length(); i++) {
         DataVector *column = columns[i];
 
+        // If the specified column is not present in the row, proceed to next row
         if (column->column_number > row.length()-1) {
             qWarning() << "Column" << column->column_number << "not found in row:" << line;
+            continue;
         }
-        else {
-            bool ok;
-            y = row[column->column_number].toDouble(&ok);
 
-            if (ok) {
-                column->x.append(t);
-                column->y.append(y);
-                plot();
-            }
-            else {
-                qWarning() << "Could not understand CSV line: " << line;
-            }
+        // Convert string to number
+        bool ok;
+        y = row[column->column_number].toDouble(&ok);
+
+        if (!ok) {
+            qWarning() << "Could not understand CSV line: " << line;
+            continue;
         }
+
+        // Add point to plot
+        column->x.append(t);
+        column->y.append(y);
+        plot();
     }
 
     t += 1;
