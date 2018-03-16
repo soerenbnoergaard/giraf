@@ -1,6 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "datavector.h"
+
 #include <QMainWindow>
 #include <QTimer>
 #include <QFile>
@@ -21,7 +23,6 @@ public:
     void loadCsvFile(QString fileName, bool *ok);
 
     void addColumn(int c);
-    void addPoint(int index, double x, double y);
     void plot();
 
 private slots:
@@ -32,14 +33,9 @@ private:
 
     // Setup
     QFile inputFile;
-    QVector<int> columns;
     QString delimiter = ",";
 
-    // Data
-
-    // TODO: Make x and y containers multidimensional
-    QVector<double> x_data;
-    QVector<double> y_data;
+    QList<DataVector *> columns;
 
     // Handles
     QTextStream *inputTextStream;

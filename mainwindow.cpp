@@ -25,25 +25,20 @@ void MainWindow::loadCsvFile(QString fileName, bool *ok)
 
 void MainWindow::addColumn(int c)
 {
-    columns.append(c);
+    DataVector *d = new DataVector(c);
+    columns.append(d);
 
-    int i = columns.indexOf(c);
+    int i = columns.indexOf(d);
+
     ui->plot->addGraph();
     ui->plot->graph(i)->setScatterStyle(QCPScatterStyle::ssCircle);
     ui->plot->graph(i)->setLineStyle(QCPGraph::lsLine);
 }
 
-void MainWindow::addPoint(int index, double x, double y)
-{
-    x_data.append(x);
-    y_data.append(y);
-}
-
 void MainWindow::plot()
 {
-    foreach (int column, columns) {
-        int i = columns.indexOf(column);
-        ui->plot->graph(i)->setData(x_data, y_data);
+    for (int i = 0; i < columns.length(); i++) {
+        ui->plot->graph(i)->setData(columns[i]->x, columns[i]->y);
     }
 
     ui->plot->update();
@@ -53,35 +48,39 @@ void MainWindow::plot()
 
 void MainWindow::on_timeout()
 {
-    static uint32_t x = 0;
+    static uint32_t t = 0;
     static uint8_t y = 0;
-    QString line;
-    QStringList row;
-    bool ok;
 
+    QString line;
     line = inputTextStream->readLine();
     if (line.length() == 0)
         return;
 
+    QStringList row;
     row = line.split(delimiter);
 
-    foreach (int column, columns) {
-        int i = columns.indexOf(column);
+    for (int i = 0; i < columns.length(); i++) {
+        DataVector *column = columns[i];
 
-        if (row.length() < column-1) {
-            qWarning() << "Column " << column << " not found in row: " << line;
+        if (column->column_number > row.length()-1) {
+            qWarning() << "Column" << column->column_number << "not found in row:" << line;
         }
-        y = row[column].toDouble(&ok);
-        if (ok) {
-            addPoint(i, x, y);
-            plot();
-        } else {
-            qWarning() << "Could not understand CSV line: " << line;
+        else {
+            bool ok;
+            y = row[column->column_number].toDouble(&ok);
+
+            if (ok) {
+                column->x.append(t);
+                column->y.append(y);
+                plot();
+            }
+            else {
+                qWarning() << "Could not understand CSV line: " << line;
+            }
         }
     }
 
-    qDebug() << line;
-    x += 1;
+    t += 1;
 }
 
 void MainWindow::initializeTimer()
