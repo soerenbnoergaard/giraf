@@ -18,10 +18,10 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    void loadCsvFile(QString fileName);
+    void loadCsvFile(QString fileName, bool *ok);
 
-    void addPoint(double x, double y);
-    void clearData();
+    void addColumn(int c);
+    void addPoint(int index, double x, double y);
     void plot();
 
 private slots:
@@ -30,8 +30,18 @@ private slots:
 private:
     Ui::MainWindow *ui;
 
-    QVector<double> x_data, y_data;
+    // Setup
     QFile inputFile;
+    QVector<int> columns;
+    QString delimiter = ",";
+
+    // Data
+
+    // TODO: Make x and y containers multidimensional
+    QVector<double> x_data;
+    QVector<double> y_data;
+
+    // Handles
     QTextStream *inputTextStream;
 
     void initializePlot();
