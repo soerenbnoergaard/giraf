@@ -1,23 +1,23 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow)
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
-    ui->setupUi(this);
-    ui->plot->addGraph();
-    ui->plot->graph(0)->setScatterStyle(QCPScatterStyle::ssNone);
-    ui->plot->graph(0)->setLineStyle(QCPGraph::lsLine);
-
-    QTimer *update_timer = new QTimer(this);
-    update_timer->start(10.0);
-    connect(update_timer, SIGNAL(timeout()), SLOT(on_update_timer_timeout()));
+    initializePlot();
+    initializeTimer();
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::loadCsvFile(QString fileName)
+{
+    // Open a file for reading (non-blocking)
+    inputFile.setFileName(fileName);
+    inputFile.open(QIODevice::ReadOnly);
+    inputTextStream = new QTextStream(&inputFile);
 }
 
 void MainWindow::addPoint(double x, double y)
@@ -40,14 +40,32 @@ void MainWindow::plot()
     ui->plot->replot();
 }
 
-void MainWindow::on_update_timer_timeout()
+void MainWindow::on_timeout()
 {
     static uint32_t x = 0;
     static uint8_t y = 0;
+    bool ok;
 
-    addPoint(x, y);
-    plot();
+    y = inputTextStream->readLine().toDouble(&ok);
 
-    x += 1;
-    y += 1;
+    if (ok) {
+        addPoint(x, y);
+        plot();
+        x += 1;
+    }
+}
+
+void MainWindow::initializePlot()
+{
+    ui->setupUi(this);
+    ui->plot->addGraph();
+    ui->plot->graph(0)->setScatterStyle(QCPScatterStyle::ssNone);
+    ui->plot->graph(0)->setLineStyle(QCPGraph::lsLine);
+}
+
+void MainWindow::initializeTimer()
+{
+    QTimer *update_timer = new QTimer(this);
+    update_timer->start(1.0); // [ms]
+    connect(update_timer, SIGNAL(timeout()), SLOT(on_timeout()));
 }
