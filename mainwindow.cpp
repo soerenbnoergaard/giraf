@@ -223,7 +223,11 @@ void MainWindow::on_timeout()
             QString label = row[column->column_index];
             ui->plot->graph(i)->setName(label);
         }
+
+        QColor legend_color = Qt::white;
+        legend_color.setAlphaF(0.7);
         ui->plot->legend->setVisible(true);
+        ui->plot->legend->setBrush(legend_color);
         ui->plot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignLeft|Qt::AlignTop);
         return;
     }
