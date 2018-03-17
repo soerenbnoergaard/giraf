@@ -2,7 +2,13 @@
 
 The program is written in Qt Creator, should anyone wish to modify it.
 
-It's aim is to provide a simple command line interface for opening a graph where the CSV data is plotted while it is being written by another process. For example, to read the file `test.csv` looking like this:
+It's aim is to provide a simple command line interface for opening a graph where the CSV data is plotted while it is being written by another process. 
+
+Being able to visualize CSV data in real-time is very useful, for example, when doing automated measurements where the data is appended to a CSV file continuously. Being able to see the data makes any erroneous measurements easy to spot.
+
+## Example
+
+To read the file `test.csv` looking like this:
 
     Frequency [MHz],Power [dBm],EVM [dB]
     2402,20.0,-30.0
@@ -28,7 +34,9 @@ The specific command line options are seen by executing
 
     giraf -h
 
-The file is reloaded when the `<Space>` is pressed.
+## Keyboard shortcuts
 
-Being able to visualize CSV data in real-time is very useful, for example, when doing automated measurements where the data is appended to a CSV file continuously. Being able to see the data makes any erroneous measurements easy to spot.
+- `<Space>`: Reload file.
+- `<Ctrl-s>`: Save image.
+
 

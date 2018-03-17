@@ -31,6 +31,7 @@ public:
 
 private slots:
     void reset();
+    void save();
     void on_timeout();
 
 private:

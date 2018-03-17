@@ -24,6 +24,29 @@ void MainWindow::reset()
     updateGraph();
 }
 
+void MainWindow::save()
+{
+    QString filter = "PNG (*.png);;PDF (*.pdf);;JPG (*.jpg)";
+    QString selected_filter;
+    QString output_file = QFileDialog::getSaveFileName(this, "Save graph", "", filter, &selected_filter);
+
+    if (selected_filter.contains("png")) {
+        if (!output_file.toLower().endsWith(".png"))
+            output_file.append(".png");
+        ui->plot->savePng(output_file);
+    }
+    else if (selected_filter.contains("pdf")) {
+        if (!output_file.toLower().endsWith(".pdf"))
+            output_file.append(".pdf");
+        ui->plot->savePdf(output_file);
+    }
+    else if (selected_filter.contains("jpg")) {
+        if (!output_file.toLower().endsWith(".jpg"))
+            output_file.append(".jpg");
+        ui->plot->saveJpg(output_file);
+    }
+}
+
 void MainWindow::loadCsvFile(QString filename, bool *ok)
 {
     // Open a file for reading (non-blocking)
@@ -117,6 +140,7 @@ void MainWindow::start()
 {
     initializeTimer();
     new QShortcut(QKeySequence(Qt::Key_Space), this, SLOT(reset()));
+    new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_S), this, SLOT(save()));
 }
 
 void MainWindow::on_timeout()
