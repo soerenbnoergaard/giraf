@@ -85,6 +85,11 @@ void MainWindow::setDelimiter(QString this_delimiter)
     delimiter = this_delimiter;
 }
 
+void MainWindow::setMarker(char this_marker)
+{
+    marker_symbol = this_marker;
+}
+
 void MainWindow::addColumn(int c)
 {
     DataVector *d = new DataVector(c);
@@ -93,9 +98,45 @@ void MainWindow::addColumn(int c)
     int i = columns.indexOf(d);
 
     ui->plot->addGraph();
-    ui->plot->graph(i)->setScatterStyle(QCPScatterStyle::ssNone);
     ui->plot->graph(i)->setLineStyle(QCPGraph::lsLine);
 
+    // Marker style
+    QCPScatterStyle marker_style;
+    switch (marker_symbol) {
+    case '+':
+        marker_style = QCPScatterStyle::ssPlus;
+        break;
+    case 'o':
+        marker_style = QCPScatterStyle::ssCircle;
+        break;
+    case '*':
+        marker_style = QCPScatterStyle::ssStar;
+        break;
+    case '.':
+        marker_style = QCPScatterStyle::ssDot;
+        break;
+    case 'x':
+        marker_style = QCPScatterStyle::ssCross;
+        break;
+    case 's':
+        marker_style = QCPScatterStyle::ssSquare;
+        break;
+    case 'd':
+        marker_style = QCPScatterStyle::ssDiamond;
+        break;
+    case '^':
+        marker_style = QCPScatterStyle::ssTriangle;
+        break;
+    case 'v':
+        marker_style = QCPScatterStyle::ssTriangleInverted;
+        break;
+    default:
+        marker_style = QCPScatterStyle::ssNone;
+        break;
+    }
+    ui->plot->graph(i)->setScatterStyle(marker_style);
+
+    // Color
     QColor color;
     switch (i % 10) {
     case 0:

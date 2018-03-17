@@ -25,6 +25,7 @@ public:
     void setHeaderRow(int row_number);
     void setXAxisColumn(int column_number);
     void setDelimiter(QString this_delimiter);
+    void setMarker(char this_marker);
     void addColumn(int c);
     void updateGraph();
     void start();
@@ -40,6 +41,7 @@ private:
 
     // Settings
     QString delimiter = ",";
+    char marker_symbol = ' ';
     int skiprows = 0;
     int headerrow = -1;
     int x_axis_column = -1;

@@ -16,6 +16,7 @@ static void initialize_arguments(QCommandLineParser *parser)
     parser->addOption(QCommandLineOption({"l", "legendrow"}, "row containing the column names for the legend (indexed from 0)", "-1"));
     parser->addOption(QCommandLineOption({"d", "delimiter"}, "column delimiter", ","));
     parser->addOption(QCommandLineOption({"x", "xcolumn"}, "column to use as x-axis (indexed from 0)", "-1"));
+    parser->addOption(QCommandLineOption({"m", "marker"}, "data marker symbol (matlab-like syntax)", " "));
 }
 
 static void apply_arguments(QCommandLineParser *parser, MainWindow *w, bool *ok)
@@ -24,10 +25,6 @@ static void apply_arguments(QCommandLineParser *parser, MainWindow *w, bool *ok)
     const QStringList positional_args = parser->positionalArguments();
     if (positional_args.length() > 0)
         w->loadCsvFile(positional_args.at(0), ok);
-
-    // -c|--column
-    foreach (QString s, parser->values("column"))
-        w->addColumn(s.toInt());
 
     // -s|--skiprows
     if (parser->isSet("skiprows"))
@@ -44,6 +41,15 @@ static void apply_arguments(QCommandLineParser *parser, MainWindow *w, bool *ok)
     // -x|--xcolumn
     if (parser->isSet("xcolumn"))
         w->setXAxisColumn(parser->value("xcolumn").toInt());
+
+    // -m|--marker
+    if (parser->isSet("marker")) {
+        w->setMarker(parser->value("marker").toStdString()[0]);
+    }
+
+    // -c|--column
+    foreach (QString s, parser->values("column"))
+        w->addColumn(s.toInt());
 }
 
 int main(int argc, char *argv[])
