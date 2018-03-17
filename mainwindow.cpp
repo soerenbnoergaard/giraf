@@ -32,6 +32,11 @@ void MainWindow::setHeaderRow(int row_number)
     headerrow = row_number;
 }
 
+void MainWindow::setDelimiter(QString this_delimiter)
+{
+    delimiter = this_delimiter;
+}
+
 void MainWindow::addColumn(int c)
 {
     DataVector *d = new DataVector(c);

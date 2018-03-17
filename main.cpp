@@ -14,6 +14,7 @@ static void initialize_arguments(QCommandLineParser *parser)
     parser->addOption(QCommandLineOption({"c", "column"}, "column to plot (indexed from 0)", "0"));
     parser->addOption(QCommandLineOption({"s", "skiprows"}, "number of rows to skip before data", "0"));
     parser->addOption(QCommandLineOption({"l", "legendrow"}, "row containing the column names for the legend (indexed from 0)", "0"));
+    parser->addOption(QCommandLineOption({"d", "delimiter"}, "column delimiter (defaults to comma)", "0"));
 }
 
 static void apply_arguments(QCommandLineParser *parser, MainWindow *w, bool *ok)
@@ -34,6 +35,10 @@ static void apply_arguments(QCommandLineParser *parser, MainWindow *w, bool *ok)
     // -l|--legendrow
     if (parser->isSet("legendrow"))
         w->setHeaderRow(parser->value("legendrow").toInt());
+
+    // -d|--delimiter
+    if (parser->isSet("delimiter"))
+        w->setDelimiter(parser->value("delimiter"));
 }
 
 int main(int argc, char *argv[])

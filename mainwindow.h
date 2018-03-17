@@ -23,6 +23,7 @@ public:
     void loadCsvFile(QString filename, bool *ok);
     void setNumberOfRowsToSkip(int num_rows);
     void setHeaderRow(int row_number);
+    void setDelimiter(QString this_delimiter);
     void addColumn(int c);
     void updateGraph();
     void start();
