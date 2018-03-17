@@ -27,6 +27,11 @@ void MainWindow::setNumberOfRowsToSkip(int num_rows)
     skiprows = num_rows;
 }
 
+void MainWindow::setHeaderRow(int row_number)
+{
+    headerrow = row_number;
+}
+
 void MainWindow::addColumn(int c)
 {
     DataVector *d = new DataVector(c);
@@ -102,28 +107,41 @@ void MainWindow::on_timeout()
     if (line.length() == 0)
         return;
 
-    // Skip a specified number of rows
-    row_counter += 1;
-    if (row_counter-1 < skiprows)
-        return;
-
     // Split the line into a row of cells
     QStringList row;
     row = line.split(delimiter);
+    row_counter += 1;
+
+    // Check if the current row contains column names
+    if (row_counter-1 == headerrow) {
+        for (int i = 0; i < columns.length(); i++) {
+            DataVector *column = columns[i];
+            if (column->column_index > row.length()-1)
+                continue;
+
+            ui->plot->graph(column->column_index)->setName(row[column->column_index]);
+        }
+        ui->plot->legend->setVisible(true);
+        return;
+    }
+
+    // Skip a specified number of rows
+    if (row_counter-1 < skiprows)
+        return;
 
     // Add columns to the plot
     for (int i = 0; i < columns.length(); i++) {
         DataVector *column = columns[i];
 
         // If the specified column is not present in the row, proceed to next row
-        if (column->column_number > row.length()-1) {
-            qWarning() << "Column" << column->column_number << "not found in row:" << line;
+        if (column->column_index > row.length()-1) {
+            qWarning() << "Column" << column->column_index << "not found in row:" << line;
             continue;
         }
 
         // Convert string to number
         bool ok;
-        y = row[column->column_number].toDouble(&ok);
+        y = row[column->column_index].toDouble(&ok);
 
         if (!ok) {
             qWarning() << "Could not understand CSV line: " << line;

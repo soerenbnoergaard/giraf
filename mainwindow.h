@@ -22,6 +22,7 @@ public:
 
     void loadCsvFile(QString filename, bool *ok);
     void setNumberOfRowsToSkip(int num_rows);
+    void setHeaderRow(int row_number);
     void addColumn(int c);
     void updateGraph();
     void start();
@@ -35,6 +36,7 @@ private:
     // Settings
     QString delimiter = ",";
     int skiprows = 0;
+    int headerrow = -1;
 
     // File and data
     QFile inputfile;

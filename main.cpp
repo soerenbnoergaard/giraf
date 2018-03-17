@@ -13,6 +13,7 @@ static void initialize_arguments(QCommandLineParser *parser)
     parser->addPositionalArgument("file", QCoreApplication::translate("main", "CSV file to open."));
     parser->addOption(QCommandLineOption({"c", "column"}, "column to plot (indexed from 0)", "0"));
     parser->addOption(QCommandLineOption({"s", "skiprows"}, "number of rows to skip before data", "0"));
+    parser->addOption(QCommandLineOption({"l", "legendrow"}, "row containing the column names for the legend (indexed from 0)", "0"));
 }
 
 static void apply_arguments(QCommandLineParser *parser, MainWindow *w, bool *ok)
@@ -29,6 +30,10 @@ static void apply_arguments(QCommandLineParser *parser, MainWindow *w, bool *ok)
     // -s|--skiprows
     if (parser->isSet("skiprows"))
         w->setNumberOfRowsToSkip(parser->value("skiprows").toInt());
+
+    // -l|--legendrow
+    if (parser->isSet("legendrow"))
+        w->setHeaderRow(parser->value("legendrow").toInt());
 }
 
 int main(int argc, char *argv[])

@@ -12,8 +12,7 @@ public:
     QVector<double> x;
     QVector<double> y;
 
-    QString name;
-    int column_number;
+    int column_index;
 };
 
 #endif // DATAVECTOR_H
