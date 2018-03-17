@@ -103,8 +103,8 @@ void MainWindow::start()
 void MainWindow::on_timeout()
 {
     static int row_counter = 0;
-    static uint32_t t = 0;
-    static uint8_t y = 0;
+    static uint64_t t = 0;
+    static double y = 0;
 
     // Read a line from the input file
     QString line;
@@ -124,7 +124,8 @@ void MainWindow::on_timeout()
             if (column->column_index > row.length()-1)
                 continue;
 
-            ui->plot->graph(column->column_index)->setName(row[column->column_index]);
+            QString label = row[column->column_index];
+            ui->plot->graph(i)->setName(label);
         }
         ui->plot->legend->setVisible(true);
         return;
