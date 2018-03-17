@@ -4,7 +4,6 @@
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    initializeTimer();
 }
 
 MainWindow::~MainWindow()
@@ -12,15 +11,20 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::loadCsvFile(QString fileName, bool *ok)
+void MainWindow::loadCsvFile(QString filename, bool *ok)
 {
     // Open a file for reading (non-blocking)
-    *ok = QFile::exists(fileName);
+    *ok = QFile::exists(filename);
     if (ok) {
-        inputFile.setFileName(fileName);
-        inputFile.open(QIODevice::ReadOnly);
-        inputTextStream = new QTextStream(&inputFile);
+        inputfile.setFileName(filename);
+        inputfile.open(QIODevice::ReadOnly);
+        inputfileTextStream = new QTextStream(&inputfile);
     }
+}
+
+void MainWindow::setNumberOfRowsToSkip(int num_rows)
+{
+    skiprows = num_rows;
 }
 
 void MainWindow::addColumn(int c)
@@ -70,7 +74,7 @@ void MainWindow::addColumn(int c)
     ui->plot->graph(i)->setPen(QPen(color));
 }
 
-void MainWindow::plot()
+void MainWindow::updateGraph()
 {
     for (int i = 0; i < columns.length(); i++) {
         ui->plot->graph(i)->setData(columns[i]->x, columns[i]->y);
@@ -81,15 +85,26 @@ void MainWindow::plot()
     ui->plot->replot();
 }
 
+void MainWindow::start()
+{
+    initializeTimer();
+}
+
 void MainWindow::on_timeout()
 {
+    static int row_counter = 0;
     static uint32_t t = 0;
     static uint8_t y = 0;
 
     // Read a line from the input file
     QString line;
-    line = inputTextStream->readLine();
+    line = inputfileTextStream->readLine();
     if (line.length() == 0)
+        return;
+
+    // Skip a specified number of rows
+    row_counter += 1;
+    if (row_counter-1 < skiprows)
         return;
 
     // Split the line into a row of cells
@@ -118,7 +133,7 @@ void MainWindow::on_timeout()
         // Add point to plot
         column->x.append(t);
         column->y.append(y);
-        plot();
+        updateGraph();
     }
 
     t += 1;

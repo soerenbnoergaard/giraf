@@ -20,10 +20,11 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    void loadCsvFile(QString fileName, bool *ok);
-
+    void loadCsvFile(QString filename, bool *ok);
+    void setNumberOfRowsToSkip(int num_rows);
     void addColumn(int c);
-    void plot();
+    void updateGraph();
+    void start();
 
 private slots:
     void on_timeout();
@@ -31,14 +32,14 @@ private slots:
 private:
     Ui::MainWindow *ui;
 
-    // Setup
-    QFile inputFile;
+    // Settings
     QString delimiter = ",";
+    int skiprows = 0;
 
+    // File and data
+    QFile inputfile;
+    QTextStream *inputfileTextStream;
     QList<DataVector *> columns;
-
-    // Handles
-    QTextStream *inputTextStream;
 
     void initializeTimer();
 };
