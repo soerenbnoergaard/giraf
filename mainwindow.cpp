@@ -11,6 +11,19 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::reset()
+{
+    bool ok;
+    foreach (DataVector *column, columns) {
+        column->x.clear();
+        column->y.clear();
+    }
+    inputfile.close();
+    row_counter = 0;
+    loadCsvFile(inputfile.fileName(), &ok);
+    updateGraph();
+}
+
 void MainWindow::loadCsvFile(QString filename, bool *ok)
 {
     // Open a file for reading (non-blocking)
@@ -30,6 +43,11 @@ void MainWindow::setNumberOfRowsToSkip(int num_rows)
 void MainWindow::setHeaderRow(int row_number)
 {
     headerrow = row_number;
+}
+
+void MainWindow::setXAxisColumn(int column_number)
+{
+    x_axis_column = column_number;
 }
 
 void MainWindow::setDelimiter(QString this_delimiter)
@@ -98,12 +116,12 @@ void MainWindow::updateGraph()
 void MainWindow::start()
 {
     initializeTimer();
+    new QShortcut(QKeySequence(Qt::Key_Space), this, SLOT(reset()));
 }
 
 void MainWindow::on_timeout()
 {
-    static int row_counter = 0;
-    static uint64_t t = 0;
+    static double x = 0;
     static double y = 0;
 
     // Read a line from the input file
@@ -128,12 +146,24 @@ void MainWindow::on_timeout()
             ui->plot->graph(i)->setName(label);
         }
         ui->plot->legend->setVisible(true);
+        ui->plot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignLeft|Qt::AlignTop);
         return;
     }
 
     // Skip a specified number of rows
     if (row_counter-1 < skiprows)
         return;
+
+    // Extract x value
+    if (x_axis_column > row.length()-1) {
+        qWarning() << "X column" << x_axis_column << "not found in row:" << line;
+    }
+    else {
+        bool ok;
+        x = row[x_axis_column].toDouble(&ok);
+        if (!ok)
+            qWarning() << "Could not understand CSV line: " << line;
+    }
 
     // Add columns to the plot
     for (int i = 0; i < columns.length(); i++) {
@@ -155,12 +185,13 @@ void MainWindow::on_timeout()
         }
 
         // Add point to plot
-        column->x.append(t);
+        column->x.append(x);
         column->y.append(y);
         updateGraph();
     }
 
-    t += 1;
+    if (x_axis_column < 0)
+        x += 1;
 }
 
 void MainWindow::initializeTimer()

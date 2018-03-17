@@ -11,10 +11,11 @@ static void initialize_arguments(QCommandLineParser *parser)
     parser->addVersionOption();
 
     parser->addPositionalArgument("file", QCoreApplication::translate("main", "CSV file to open."));
-    parser->addOption(QCommandLineOption({"c", "column"}, "column to plot (indexed from 0)", "0"));
+    parser->addOption(QCommandLineOption({"c", "column"}, "column to plot (indexed from 0)", " "));
     parser->addOption(QCommandLineOption({"s", "skiprows"}, "number of rows to skip before data", "0"));
-    parser->addOption(QCommandLineOption({"l", "legendrow"}, "row containing the column names for the legend (indexed from 0)", "0"));
-    parser->addOption(QCommandLineOption({"d", "delimiter"}, "column delimiter (defaults to comma)", "0"));
+    parser->addOption(QCommandLineOption({"l", "legendrow"}, "row containing the column names for the legend (indexed from 0)", "-1"));
+    parser->addOption(QCommandLineOption({"d", "delimiter"}, "column delimiter", ","));
+    parser->addOption(QCommandLineOption({"x", "xcolumn"}, "column to use as x-axis (indexed from 0)", "-1"));
 }
 
 static void apply_arguments(QCommandLineParser *parser, MainWindow *w, bool *ok)
@@ -39,6 +40,10 @@ static void apply_arguments(QCommandLineParser *parser, MainWindow *w, bool *ok)
     // -d|--delimiter
     if (parser->isSet("delimiter"))
         w->setDelimiter(parser->value("delimiter"));
+
+    // -x|--xcolumn
+    if (parser->isSet("xcolumn"))
+        w->setXAxisColumn(parser->value("xcolumn").toInt());
 }
 
 int main(int argc, char *argv[])
