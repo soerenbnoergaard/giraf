@@ -170,7 +170,7 @@ void MainWindow::on_timeout()
     // Check if the current row contains column names
     if (row_counter-1 == headerrow) {
         // X-axis label
-        if (x_axis_column < row.length())
+        if ((0 <= x_axis_column) && (x_axis_column < row.length()))
             ui->plot->xAxis->setLabel(row[x_axis_column]);
 
         // Legend labels
@@ -192,14 +192,16 @@ void MainWindow::on_timeout()
         return;
 
     // Extract x value
-    if (x_axis_column > row.length()-1) {
-        qWarning() << "X column" << x_axis_column << "not found in row:" << line;
-    }
-    else {
-        bool ok;
-        x = row[x_axis_column].toDouble(&ok);
-        if (!ok)
-            qWarning() << "Could not understand CSV line: " << line;
+    if (x_axis_column >= 0) {
+        if (x_axis_column > row.length()-1) {
+            qWarning() << "X column" << x_axis_column << "not found in row:" << line;
+        }
+        else {
+            bool ok;
+            x = row[x_axis_column].toDouble(&ok);
+            if (!ok)
+                qWarning() << "Could not understand CSV line: " << line;
+        }
     }
 
     // Add columns to the plot
