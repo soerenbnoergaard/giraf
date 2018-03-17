@@ -137,6 +137,11 @@ void MainWindow::on_timeout()
 
     // Check if the current row contains column names
     if (row_counter-1 == headerrow) {
+        // X-axis label
+        if (x_axis_column < row.length())
+            ui->plot->xAxis->setLabel(row[x_axis_column]);
+
+        // Legend labels
         for (int i = 0; i < columns.length(); i++) {
             DataVector *column = columns[i];
             if (column->column_index > row.length()-1)
