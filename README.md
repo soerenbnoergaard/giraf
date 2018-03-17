@@ -38,5 +38,6 @@ The specific command line options are seen by executing
 
 - `<Space>`: Reload file.
 - `<Ctrl-s>`: Save image.
+- `<Ctrl-c>`: Copy to clipboard.
 
 

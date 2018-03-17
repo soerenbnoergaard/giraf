@@ -47,6 +47,13 @@ void MainWindow::save()
     }
 }
 
+void MainWindow::copy()
+{
+    QClipboard *clipboard = QApplication::clipboard();
+    QPixmap pixmap = ui->plot->toPixmap();
+    clipboard->setPixmap(pixmap);
+}
+
 void MainWindow::loadCsvFile(QString filename, bool *ok)
 {
     // Open a file for reading (non-blocking)
@@ -141,6 +148,7 @@ void MainWindow::start()
     initializeTimer();
     new QShortcut(QKeySequence(Qt::Key_Space), this, SLOT(reset()));
     new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_S), this, SLOT(save()));
+    new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_C), this, SLOT(copy()));
 }
 
 void MainWindow::on_timeout()

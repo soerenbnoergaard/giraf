@@ -32,6 +32,7 @@ public:
 private slots:
     void reset();
     void save();
+    void copy();
     void on_timeout();
 
 private:
