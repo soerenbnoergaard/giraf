@@ -102,6 +102,11 @@ void MainWindow::setLineEnable(bool on)
     line_enabled = on;
 }
 
+void MainWindow::setWindowSize(int size)
+{
+    window_size = size;
+}
+
 void MainWindow::setXLimits(double xmin, double xmax)
 {
     xlim[0] = xmin;
@@ -331,6 +336,14 @@ void MainWindow::on_timeout()
         // Add point to plot
         column->x.append(x);
         column->y.append(y);
+
+        // If the windowed option is used, delete exceeding points
+        if ((window_size > 0) && (x_axis_column < 0)) {
+            while (column->x.length() > window_size) {
+                column->x.remove(0);
+                column->y.remove(0);
+            }
+        }
         updateGraph();
     }
 }

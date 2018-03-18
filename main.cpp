@@ -18,6 +18,7 @@ static void initialize_arguments(QCommandLineParser *parser)
     parser->addOption(QCommandLineOption({"d", "delimiter"}, "column delimiter", ","));
     parser->addOption(QCommandLineOption({"m", "marker"}, "data marker symbol (matlab-like syntax)", " "));
     parser->addOption(QCommandLineOption({"n", "noline"}, "disable line and plot only markers"));
+    parser->addOption(QCommandLineOption({"w", "window"}, "windowed plotting (strip chart) showing only the most recent values (only avalilable without the xcolumn option)", "0"));
     parser->addOption(QCommandLineOption("xlim", "fixed x-axis limits (format: \"min,max\")", "\"0,0\""));
     parser->addOption(QCommandLineOption("ylim", "fixed y-axis limits (format: \"min,max\")", "\"0,0\""));
 }
@@ -65,6 +66,15 @@ static void apply_arguments(QCommandLineParser *parser, MainWindow *w, bool *ok)
             w->setNumberOfRowsToSkip(n);
         else
             argument_warning("skiprows");
+    }
+
+    // -w|--window
+    if (parser->isSet("window")) {
+        n = parser->value("window").toInt();
+        if (n > 0)
+            w->setWindowSize(n);
+        else
+            argument_warning("window");
     }
 
     // --xlim
