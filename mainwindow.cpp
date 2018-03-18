@@ -90,6 +90,11 @@ void MainWindow::setMarker(char this_marker)
     marker_symbol = this_marker;
 }
 
+void MainWindow::setLineEnable(bool on)
+{
+    line_enabled = on;
+}
+
 void MainWindow::addColumn(int c)
 {
     DataVector *d = new DataVector(c);
@@ -98,7 +103,12 @@ void MainWindow::addColumn(int c)
     int i = columns.indexOf(d);
 
     ui->plot->addGraph();
-    ui->plot->graph(i)->setLineStyle(QCPGraph::lsLine);
+
+    // Line style
+    if (line_enabled)
+        ui->plot->graph(i)->setLineStyle(QCPGraph::lsLine);
+    else
+        ui->plot->graph(i)->setLineStyle(QCPGraph::lsNone);
 
     // Marker style
     QCPScatterStyle marker_style;

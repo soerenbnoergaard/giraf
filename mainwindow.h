@@ -26,6 +26,7 @@ public:
     void setXAxisColumn(int column_number);
     void setDelimiter(QString this_delimiter);
     void setMarker(char this_marker);
+    void setLineEnable(bool on);
     void addColumn(int c);
     void updateGraph();
     void start();
@@ -45,6 +46,7 @@ private:
     int skiprows = 0;
     int headerrow = -1;
     int x_axis_column = -1;
+    bool line_enabled = true;
 
     // File and data
     QFile inputfile;

@@ -9,7 +9,6 @@ static void initialize_arguments(QCommandLineParser *parser)
     parser->setApplicationDescription("Description: Real-time plotting of a CSV file.");
 
     parser->addHelpOption();
-    parser->addVersionOption();
 
     parser->addPositionalArgument("file", QCoreApplication::translate("main", "CSV file to open."));
     parser->addOption(QCommandLineOption({"y", "ycolumn"}, "column to plot (indexed from 1)", " "));
@@ -18,6 +17,7 @@ static void initialize_arguments(QCommandLineParser *parser)
     parser->addOption(QCommandLineOption({"l", "legendrow"}, "row containing the column names for the legend (indexed from 1)", "0"));
     parser->addOption(QCommandLineOption({"d", "delimiter"}, "column delimiter", ","));
     parser->addOption(QCommandLineOption({"m", "marker"}, "data marker symbol (matlab-like syntax)", " "));
+    parser->addOption(QCommandLineOption({"n", "noline"}, "disable line and plot only markers"));
 }
 
 static void argument_warning(QString parameter)
@@ -42,6 +42,13 @@ static void apply_arguments(QCommandLineParser *parser, MainWindow *w, bool *ok)
     // -m|--marker
     if (parser->isSet("marker")) {
         w->setMarker(parser->value("marker").toStdString()[0]);
+    }
+
+    // -n|--noline
+    if (parser->isSet("noline")) {
+        w->setLineEnable(false);
+        if (!parser->isSet("marker"))
+            w->setMarker('o');
     }
 
     // -s|--skiprows
