@@ -67,6 +67,11 @@ void MainWindow::loadCsvFile(QString filename, bool *ok)
     }
 }
 
+void MainWindow::loadPipeInput()
+{
+    inputfileTextStream = new QTextStream(stdin);
+}
+
 void MainWindow::setNumberOfRowsToSkip(int num_rows)
 {
     skiprows = num_rows;

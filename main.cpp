@@ -33,8 +33,13 @@ static void apply_arguments(QCommandLineParser *parser, MainWindow *w, bool *ok)
 
     // file (positional)
     const QStringList positional_args = parser->positionalArguments();
-    if (positional_args.length() > 0)
+    if (positional_args.length() > 0) {
         w->loadCsvFile(positional_args.at(0), ok);
+    }
+    else {
+        w->loadPipeInput();
+        *ok = true;
+    }
 
     // -d|--delimiter
     if (parser->isSet("delimiter")) {

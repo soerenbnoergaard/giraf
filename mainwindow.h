@@ -21,6 +21,7 @@ public:
     ~MainWindow();
 
     void loadCsvFile(QString filename, bool *ok);
+    void loadPipeInput();
     void setNumberOfRowsToSkip(int num_rows);
     void setHeaderRow(int row_number);
     void setXAxisColumn(int column_number);
