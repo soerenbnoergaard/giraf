@@ -44,7 +44,7 @@ private:
     QString delimiter = ",";
     char marker_symbol = ' ';
     int skiprows = 0;
-    int headerrow = -1;
+    int headerrow = 0;
     int x_axis_column = -1;
     bool line_enabled = true;
 

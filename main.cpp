@@ -12,9 +12,9 @@ static void initialize_arguments(QCommandLineParser *parser)
 
     parser->addPositionalArgument("file", QCoreApplication::translate("main", "CSV file to open."));
     parser->addOption(QCommandLineOption({"y", "ycolumn"}, "column to plot (indexed from 1)", " "));
-    parser->addOption(QCommandLineOption({"x", "xcolumn"}, "column to use as x-axis (indexed from 1)", "0"));
+    parser->addOption(QCommandLineOption({"x", "xcolumn"}, "column to use as x-axis (indexed from 1, 0 to disable)", "0"));
     parser->addOption(QCommandLineOption({"s", "skiprows"}, "number of rows to skip before data", "0"));
-    parser->addOption(QCommandLineOption({"l", "legendrow"}, "row containing the column names for the legend (indexed from 1)", "0"));
+    parser->addOption(QCommandLineOption({"l", "legendrow"}, "row containing the column names for the legend (indexed from 1, 0 to disable)", "1"));
     parser->addOption(QCommandLineOption({"d", "delimiter"}, "column delimiter", ","));
     parser->addOption(QCommandLineOption({"m", "marker"}, "data marker symbol (matlab-like syntax)", " "));
     parser->addOption(QCommandLineOption({"n", "noline"}, "disable line and plot only markers"));
@@ -68,7 +68,7 @@ static void apply_arguments(QCommandLineParser *parser, MainWindow *w, bool *ok)
     // -l|--legendrow
     if (parser->isSet("legendrow")) {
         n = parser->value("legendrow").toInt();
-        if (n > 0)
+        if (n >= 0)
             w->setHeaderRow(n - 1);
         else
             argument_warning("legendrow");
@@ -77,7 +77,7 @@ static void apply_arguments(QCommandLineParser *parser, MainWindow *w, bool *ok)
     // -x|--xcolumn
     if (parser->isSet("xcolumn")) {
         n = parser->value("xcolumn").toInt();
-        if (n > 0)
+        if (n >= 0)
             w->setXAxisColumn(n - 1);
         else
             argument_warning("xcolumn");

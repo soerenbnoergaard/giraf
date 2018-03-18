@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <QRegExp>
+
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
@@ -213,9 +215,22 @@ void MainWindow::on_timeout()
     if (line.length() == 0)
         return;
 
-    // Split the line into a row of cells
+    // Split the line into a row of cells.
+    // If a `delimiter` is present inside quotes, replace it with another character.
+    // http://www.qtcentre.org/threads/37304-Split-strings-using-QStringList-split()-but-ignore-quotes
+
     QStringList row;
-    row = line.split(delimiter);
+    QStringList tmp_list = line.split(QRegExp("\""));
+    bool inside = false;
+    row.clear();
+    foreach (QString s, tmp_list) {
+        if (inside)
+            row.append(s);
+        else
+            row.append(s.split(QRegExp(delimiter), QString::SkipEmptyParts));
+        inside = !inside;
+    }
+
     row_counter += 1;
 
     // Check if the current row contains column names
