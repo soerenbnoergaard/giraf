@@ -11,11 +11,11 @@ static void initialize_arguments(QCommandLineParser *parser)
     parser->addVersionOption();
 
     parser->addPositionalArgument("file", QCoreApplication::translate("main", "CSV file to open."));
-    parser->addOption(QCommandLineOption({"c", "column"}, "column to plot (indexed from 0)", " "));
+    parser->addOption(QCommandLineOption({"y", "ycolumn"}, "column to plot (indexed from 0)", " "));
+    parser->addOption(QCommandLineOption({"x", "xcolumn"}, "column to use as x-axis (indexed from 0)", "-1"));
     parser->addOption(QCommandLineOption({"s", "skiprows"}, "number of rows to skip before data", "0"));
     parser->addOption(QCommandLineOption({"l", "legendrow"}, "row containing the column names for the legend (indexed from 0)", "-1"));
     parser->addOption(QCommandLineOption({"d", "delimiter"}, "column delimiter", ","));
-    parser->addOption(QCommandLineOption({"x", "xcolumn"}, "column to use as x-axis (indexed from 0)", "-1"));
     parser->addOption(QCommandLineOption({"m", "marker"}, "data marker symbol (matlab-like syntax)", " "));
 }
 
@@ -47,8 +47,8 @@ static void apply_arguments(QCommandLineParser *parser, MainWindow *w, bool *ok)
         w->setMarker(parser->value("marker").toStdString()[0]);
     }
 
-    // -c|--column
-    foreach (QString s, parser->values("column"))
+    // -y|--ycolumn
+    foreach (QString s, parser->values("ycolumn"))
         w->addColumn(s.toInt());
 }
 
