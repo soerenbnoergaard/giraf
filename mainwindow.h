@@ -27,6 +27,8 @@ public:
     void setDelimiter(QString this_delimiter);
     void setMarker(char this_marker);
     void setLineEnable(bool on);
+    void setXLimits(double xmin, double xmax);
+    void setYLimits(double ymin, double ymax);
     void addColumn(int c);
     void updateGraph();
     void start();
@@ -47,6 +49,8 @@ private:
     int headerrow = 0;
     int x_axis_column = -1;
     bool line_enabled = true;
+    double xlim[2] = {0.0, 0.0};
+    double ylim[2] = {0.0, 0.0};
 
     // File and data
     QFile inputfile;

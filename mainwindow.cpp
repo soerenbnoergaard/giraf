@@ -97,6 +97,18 @@ void MainWindow::setLineEnable(bool on)
     line_enabled = on;
 }
 
+void MainWindow::setXLimits(double xmin, double xmax)
+{
+    xlim[0] = xmin;
+    xlim[1] = xmax;
+}
+
+void MainWindow::setYLimits(double ymin, double ymax)
+{
+    ylim[0] = ymin;
+    ylim[1] = ymax;
+}
+
 void MainWindow::addColumn(int c)
 {
     DataVector *d = new DataVector(c);
@@ -192,7 +204,17 @@ void MainWindow::updateGraph()
     }
 
     ui->plot->update();
-    ui->plot->rescaleAxes();
+
+    if (xlim[0] == xlim[1])
+        ui->plot->xAxis->rescale();
+    else
+        ui->plot->xAxis->setRange(xlim[0], xlim[1]);
+
+    if (ylim[0] == ylim[1])
+        ui->plot->yAxis->rescale();
+    else
+        ui->plot->yAxis->setRange(ylim[0], ylim[1]);
+
     ui->plot->replot();
 }
 
@@ -263,6 +285,7 @@ void MainWindow::on_timeout()
 
     // Extract x value
     if (x_axis_column >= 0) {
+        // Use x_axis_column as x-axis.
         if (x_axis_column > row.length()-1) {
             qWarning() << "X column" << x_axis_column << "not found in row:" << line;
         }
@@ -272,6 +295,13 @@ void MainWindow::on_timeout()
             if (!ok)
                 qWarning() << "Could not understand CSV line: " << line;
         }
+    }
+    else {
+        // Use row counter as x-axis.
+        if (headerrow < skiprows)
+            x = row_counter - skiprows - 1;
+        else
+            x = row_counter - skiprows - 2;
     }
 
     // Add columns to the plot
@@ -298,9 +328,6 @@ void MainWindow::on_timeout()
         column->y.append(y);
         updateGraph();
     }
-
-    if (x_axis_column < 0)
-        x += 1;
 }
 
 void MainWindow::initializeTimer()

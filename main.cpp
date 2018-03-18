@@ -18,6 +18,8 @@ static void initialize_arguments(QCommandLineParser *parser)
     parser->addOption(QCommandLineOption({"d", "delimiter"}, "column delimiter", ","));
     parser->addOption(QCommandLineOption({"m", "marker"}, "data marker symbol (matlab-like syntax)", " "));
     parser->addOption(QCommandLineOption({"n", "noline"}, "disable line and plot only markers"));
+    parser->addOption(QCommandLineOption("xlim", "fixed x-axis limits (format: \"min,max\")", "\"0,0\""));
+    parser->addOption(QCommandLineOption("ylim", "fixed y-axis limits (format: \"min,max\")", "\"0,0\""));
 }
 
 static void argument_warning(QString parameter)
@@ -58,6 +60,24 @@ static void apply_arguments(QCommandLineParser *parser, MainWindow *w, bool *ok)
             w->setNumberOfRowsToSkip(n);
         else
             argument_warning("skiprows");
+    }
+
+    // --xlim
+    if (parser->isSet("xlim")) {
+        QStringList l = parser->value("xlim").split(",");
+        if (l.length() == 2)
+            w->setXLimits(l[0].toDouble(), l[1].toDouble());
+        else
+            argument_warning("xlim");
+    }
+
+    // --ylim
+    if (parser->isSet("ylim")) {
+        QStringList l = parser->value("ylim").split(",");
+        if (l.length() == 2)
+            w->setYLimits(l[0].toDouble(), l[1].toDouble());
+        else
+            argument_warning("ylim");
     }
 
     //
