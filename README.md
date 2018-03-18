@@ -20,9 +20,9 @@ To read the file `test.csv` looking like this:
     2462,21.0,-24.0
     2472,20.1,-22.5
 
-where the first row contains labels, the first column contains x-axis data, and the two last rows contain measurement data, the following command is executed:
+where the first row contains labels, the first column contains x-axis data, and the two last rows contain measurement data, the following command is executed (note, the indexing is done from 1 to comply with most spreadsheet software):
 
-    giraf -l0 -x0 -c1 -c2 test.csv
+    giraf -l1 -x1 -y2 -y3 test.csv
 
 The resulting graph is then
 
