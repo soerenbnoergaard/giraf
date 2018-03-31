@@ -51,6 +51,13 @@ _Note that many processes have output buffering enabled._ To get real-time data,
 
 It would be great to have `giraf` handle this, but I am not sure it is possible as the buffering is done in the source process. Any suggestions are more than welcome!
 
+Another use of this would be reading from a serial port. I have read from a virtual USB serial port in linux using the following commands:
+
+    stty -F /dev/ttyACM0 raw -echo -echoe -echok
+    cat /dev/ttyACM0 | giraf -l0 -y1 -w100
+
+Note that the `stty` command probably needs to be extended to with baud rate, etc, when reading from an actual UART.
+
 
 ## Commands and Keyboard shortcuts
 
