@@ -13,8 +13,16 @@ import (
 
 // Types ///////////////////////////////////////////////////////////////////////
 
+// Output determines the destination for the SVG file.
+type Output int
+const (
+    FILE Output = iota
+    SERVER
+)
+
 // Settings contain generic settings given by the user.
 type Settings struct {
+    output     Output
 	column     int
 	outfile    string
 	skiprows   uint64
@@ -32,6 +40,7 @@ type Graph struct {
 
 var (
 	settings Settings = Settings{
+        output:     SERVER,
 		column:     1,
 		outfile:    "output.svg",
 		skiprows:   1,
@@ -65,7 +74,7 @@ func yscale(p float64) int32 {
 	return graph.height_px - int32(p)
 }
 
-func toSvgPath(x, y []float64) (string, error) {
+func dataToSvgPath(x, y []float64) (string, error) {
 	if len(x) != len(y) {
 		return "", errors.New("len(x) != len(y)")
 	} else if len(x) == 0 {
@@ -79,7 +88,35 @@ func toSvgPath(x, y []float64) (string, error) {
 	return s, nil
 }
 
-func write(path string) (err error) {
+func dataToSvg(x, y []float64) (string, error) {
+    output := ""
+
+	output += fmt.Sprintf("<svg xmlns='http://www.w3.org/2000/svg' width='%d' height='%d'>", graph.width_px, graph.height_px)
+
+	xmin_px := xscale(0.0)
+	xmax_px := xscale(float64(graph.xwindow))
+	ymin_px := yscale(graph.ymin)
+	ymax_px := yscale(graph.ymax)
+	output += fmt.Sprintf("<path d='M %d %d L %d %d L %d %d L %d %d Z' fill='#ffffff' stroke='#000000' />",
+		xmin_px, ymin_px,
+		xmax_px, ymin_px,
+		xmax_px, ymax_px,
+		xmin_px, ymax_px,
+	)
+
+    output += "<path d='"
+    s, err := dataToSvgPath(x, y)
+    if err != nil {
+        return "", err
+    }
+    output += s
+    output += "' stroke='#0000ff' fill-opacity='0.0'/>\n"
+
+	output += "</svg>"
+	return output, nil
+}
+
+func writeFile(s string) (err error) {
 	f, err := os.Create(settings.outfile)
 	if err != nil {
 		return fmt.Errorf("Could not open file %s", settings.outfile)
@@ -87,44 +124,14 @@ func write(path string) (err error) {
 
 	defer f.Close()
 
-	var header = fmt.Sprintf("<svg xmlns='http://www.w3.org/2000/svg' width='%d' height='%d'>", graph.width_px, graph.height_px)
-	_, err = f.Write([]byte(header + "\n"))
-	if err != nil {
-		return err
-	}
+    _, err = f.Write([]byte(s))
 
-	xmin_px := xscale(0.0)
-	xmax_px := xscale(float64(graph.xwindow))
-	ymin_px := yscale(graph.ymin)
-	ymax_px := yscale(graph.ymax)
-	var box = fmt.Sprintf("<path d='M %d %d L %d %d L %d %d L %d %d Z' fill='#ffffff' stroke='#000000' />",
-		xmin_px, ymin_px,
-		xmax_px, ymin_px,
-		xmax_px, ymax_px,
-		xmin_px, ymax_px,
-	)
-	_, err = f.Write([]byte(box + "\n"))
-	if err != nil {
-		return err
-	}
-
-	_, err = f.Write([]byte("<path d='" + path + "' stroke='#0000ff' fill-opacity='0.0'/>\n"))
-	if err != nil {
-		return err
-	}
-
-	var footer = "</svg>"
-	_, err = f.Write([]byte(footer + "\n"))
-	if err != nil {
-		return err
-	}
-
-	return nil
+    return err
 }
 
 // Go-routines /////////////////////////////////////////////////////////////////
 
-func outputHandler(c chan float64) {
+func outputHandler(datachannel chan float64, svgchannel chan string) {
 	var x []float64
 	var y []float64
 	var n uint64 = 0
@@ -133,7 +140,7 @@ func outputHandler(c chan float64) {
 	for {
 		// Check for input
 		select {
-		case value := <-c:
+		case value := <-datachannel:
 			if n < graph.xwindow {
 				x = append(x, float64(n))
 				y = append(y, value)
@@ -147,12 +154,23 @@ func outputHandler(c chan float64) {
 		// Update the output at the output rate
 		tnow := time.Now()
 		if time.Now().After(tnext) {
-			path, err := toSvgPath(x, y)
-			if err != nil {
-				log.Fatal("Error converting x, y to SVG path string")
-				return
-			}
-			write(path)
+            svg, err := dataToSvg(x, y)
+            if err != nil {
+                log.Fatal(err)
+                continue
+            }
+
+            switch settings.output {
+            case FILE:
+                err = writeFile(svg)
+                if err != nil {
+                    log.Fatal(err)
+                    continue
+                }
+
+            case SERVER:
+                svgchannel <-svg
+            }
 
 			tnext = tnow.Add(settings.outputrate)
 		}
@@ -167,8 +185,13 @@ func main() {
 
 	var rowcount uint64 = 0
 
-	c := make(chan float64)
-	go outputHandler(c)
+	datachannel := make(chan float64)
+    svgchannel := make(chan string)
+
+	go outputHandler(datachannel, svgchannel)
+    if settings.output == SERVER {
+        go server(svgchannel)
+    }
 
 	for {
 		input, err := reader.Read()
@@ -190,6 +213,6 @@ func main() {
 			continue
 		}
 
-		c <- value
+		datachannel <- value
 	}
 }
