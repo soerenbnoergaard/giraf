@@ -38,7 +38,7 @@ func server(svgchannel chan string) {
 <html>
     <head>
     <script>
-        var socket = new WebSocket("ws://localhost:8080/comm");
+        var socket = new WebSocket("ws://localhost:%d/comm");
         socket.onmessage = function (e) {
             document.getElementById("out").innerHTML = e.data;
         };
@@ -48,7 +48,7 @@ func server(svgchannel chan string) {
     <span id="out">
     </span>
     </body>
-</html>`)
+</html>`, settings.port)
 	})
 
 	fmt.Printf("Running on:\nhttp://localhost:%d\n", settings.port)
