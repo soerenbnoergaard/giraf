@@ -8,15 +8,17 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"time"
 )
 
 // Types ///////////////////////////////////////////////////////////////////////
 
 // Settings contain generic settings given by the user.
 type Settings struct {
-	column   int
-	outfile  string
-	skiprows uint64
+	column     int
+	outfile    string
+	skiprows   uint64
+	outputrate time.Duration
 }
 
 // Graph contains the values necessary to draw the data as a graph.
@@ -30,9 +32,10 @@ type Graph struct {
 
 var (
 	settings Settings = Settings{
-		column:   1,
-		outfile:  "output.svg",
-		skiprows: 1,
+		column:     1,
+		outfile:    "output.svg",
+		skiprows:   1,
+		outputrate: 50 * time.Millisecond,
 	}
 	graph Graph = Graph{
 		width_px:  600,
@@ -119,6 +122,43 @@ func write(path string) (err error) {
 	return nil
 }
 
+// Go-routines /////////////////////////////////////////////////////////////////
+
+func outputHandler(c chan float64) {
+	var x []float64
+	var y []float64
+	var n uint64 = 0
+
+	tnext := time.Now()
+	for {
+		// Check for input
+		select {
+		case value := <-c:
+			if n < graph.xwindow {
+				x = append(x, float64(n))
+				y = append(y, value)
+			} else {
+				y = append(y[1:], value)
+			}
+
+			n += 1
+		}
+
+		// Update the output at the output rate
+		tnow := time.Now()
+		if time.Now().After(tnext) {
+			path, err := toSvgPath(x, y)
+			if err != nil {
+				log.Fatal("Error converting x, y to SVG path string")
+				return
+			}
+			write(path)
+
+			tnext = tnow.Add(settings.outputrate)
+		}
+	}
+}
+
 // Main ////////////////////////////////////////////////////////////////////////
 
 func main() {
@@ -126,10 +166,9 @@ func main() {
 	reader.ReuseRecord = true
 
 	var rowcount uint64 = 0
-	var valuecount uint64 = 0
 
-	// Windowed data window (oscilloscope-like)
-	var x, y []float64
+	c := make(chan float64)
+	go outputHandler(c)
 
 	for {
 		input, err := reader.Read()
@@ -151,20 +190,6 @@ func main() {
 			continue
 		}
 
-		if valuecount < graph.xwindow {
-			x = append(x, float64(valuecount))
-			y = append(y, value)
-		} else {
-			y = append(y[1:], value)
-		}
-
-		path, err := toSvgPath(x, y)
-		if err != nil {
-			log.Fatal("Error converting x, y to SVG path string")
-			return
-		}
-		write(path)
-
-		valuecount += 1
+		c <- value
 	}
 }
