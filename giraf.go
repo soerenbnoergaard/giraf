@@ -40,7 +40,7 @@ var (
 	graph Graph = Graph{
 		width_px:  600,
 		height_px: 400,
-		xwindow:   100,
+		xwindow:   200,
 		ymin:      0.0,
 		ymax:      1.0,
 	}
