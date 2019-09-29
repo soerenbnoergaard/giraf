@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/csv"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -21,7 +22,7 @@ type Settings struct {
 // Graph contains the values necessary to draw the data as a graph.
 type Graph struct {
 	width_px, height_px int32
-	xmin, xmax          float64
+	xwindow             uint64
 	ymin, ymax          float64
 }
 
@@ -34,12 +35,11 @@ var (
 		skiprows: 1,
 	}
 	graph Graph = Graph{
-		width_px:  800,
+		width_px:  600,
 		height_px: 400,
-		xmin:      0.0,
-		xmax:      10.0,
-		ymin:      10.0,
-		ymax:      30.0,
+		xwindow:   100,
+		ymin:      0.0,
+		ymax:      1.0,
 	}
 )
 
@@ -48,19 +48,32 @@ var (
 // xscale transforms the value from the data domain to the pixel domain for
 // drawing.
 func xscale(p float64) int32 {
-    p -= graph.xmin
-    p *= float64(graph.width_px)
-    p /= (graph.xmax - graph.xmin)
-    return int32(p)
+	p *= float64(graph.width_px)
+	p /= float64(graph.xwindow)
+	return int32(p)
 }
 
 // yscale transforms the value from the data domain to the pixel domain for
 // drawing. Note that the positive pixel direction is downwards!
 func yscale(p float64) int32 {
-    p -= graph.ymin
-    p *= float64(graph.height_px)
-    p /= (graph.ymax - graph.ymin)
-    return graph.height_px - int32(p)
+	p -= graph.ymin
+	p *= float64(graph.height_px)
+	p /= (graph.ymax - graph.ymin)
+	return graph.height_px - int32(p)
+}
+
+func toSvgPath(x, y []float64) (string, error) {
+	if len(x) != len(y) {
+		return "", errors.New("len(x) != len(y)")
+	} else if len(x) == 0 {
+		return "", nil
+	}
+
+	s := fmt.Sprintf("M %d %d ", xscale(x[0]), yscale(y[0]))
+	for n := 1; n < len(x); n++ {
+		s += fmt.Sprintf("L %d %d ", xscale(x[n]), yscale(y[n]))
+	}
+	return s, nil
 }
 
 func write(path string) (err error) {
@@ -71,22 +84,22 @@ func write(path string) (err error) {
 
 	defer f.Close()
 
-	var header = fmt.Sprintf("<svg width='%d' height='%d'>", graph.width_px, graph.height_px)
+	var header = fmt.Sprintf("<svg xmlns='http://www.w3.org/2000/svg' width='%d' height='%d'>", graph.width_px, graph.height_px)
 	_, err = f.Write([]byte(header + "\n"))
 	if err != nil {
 		return err
 	}
 
-    xmin_px := xscale(graph.xmin)
-    xmax_px := xscale(graph.xmax)
-    ymin_px := yscale(graph.ymin)
-    ymax_px := yscale(graph.ymax)
-    var box = fmt.Sprintf("<path d='M %d %d L %d %d L %d %d L %d %d Z' fill='#ffffff' />",
-        xmin_px, ymin_px,
-        xmax_px, ymin_px,
-        xmax_px, ymax_px,
-        xmin_px, ymax_px,
-    )
+	xmin_px := xscale(0.0)
+	xmax_px := xscale(float64(graph.xwindow))
+	ymin_px := yscale(graph.ymin)
+	ymax_px := yscale(graph.ymax)
+	var box = fmt.Sprintf("<path d='M %d %d L %d %d L %d %d L %d %d Z' fill='#ffffff' stroke='#000000' />",
+		xmin_px, ymin_px,
+		xmax_px, ymin_px,
+		xmax_px, ymax_px,
+		xmin_px, ymax_px,
+	)
 	_, err = f.Write([]byte(box + "\n"))
 	if err != nil {
 		return err
@@ -110,10 +123,13 @@ func write(path string) (err error) {
 
 func main() {
 	reader := csv.NewReader(os.Stdin)
+	reader.ReuseRecord = true
 
 	var rowcount uint64 = 0
 	var valuecount uint64 = 0
-	var path string = ""
+
+	// Windowed data window (oscilloscope-like)
+	var x, y []float64
 
 	for {
 		input, err := reader.Read()
@@ -135,15 +151,20 @@ func main() {
 			continue
 		}
 
-		// println(value)
-		var prefix byte
-		if valuecount == 0 {
-            prefix = 'M'
+		if valuecount < graph.xwindow {
+			x = append(x, float64(valuecount))
+			y = append(y, value)
 		} else {
-            prefix = 'L'
+			y = append(y[1:], value)
 		}
-		path += fmt.Sprintf("%c %d %d ", prefix, xscale(float64(valuecount)), yscale(value))
+
+		path, err := toSvgPath(x, y)
+		if err != nil {
+			log.Fatal("Error converting x, y to SVG path string")
+			return
+		}
+		write(path)
+
 		valuecount += 1
 	}
-	write(path)
 }

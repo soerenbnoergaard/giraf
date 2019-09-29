@@ -1,0 +1,13 @@
+<html>
+    <head>
+    <script>
+        setInterval(function () {
+            var t = new Date().getTime()
+            document.getElementById("scope").src = "output.svg?random="+t;
+        }, 200);
+    </script>
+    </head>
+    <body>
+        <img id="scope" />
+    </body>
+</html>
