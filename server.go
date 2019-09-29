@@ -14,25 +14,25 @@ func server(svgchannel chan string) {
 		WriteBufferSize: 1024,
 	}
 
-    // Websocket port
+	// Websocket port
 	http.HandleFunc("/comm", func(w http.ResponseWriter, r *http.Request) {
-        conn, err := upgrader.Upgrade(w, r, nil)
+		conn, err := upgrader.Upgrade(w, r, nil)
 
-        if err != nil {
-            log.Fatal("Error running upgrade")
-            return
-        }
+		if err != nil {
+			log.Fatal("Error running upgrade")
+			return
+		}
 
-        for {
-            err = conn.WriteMessage(websocket.TextMessage, []byte(<-svgchannel))
-            if err != nil {
-                println("Connection closed")
-                break
-            }
-        }
+		for {
+			err = conn.WriteMessage(websocket.TextMessage, []byte(<-svgchannel))
+			if err != nil {
+				println("Connection closed")
+				break
+			}
+		}
 	})
 
-    // HTTP port
+	// HTTP port
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, `
 <html>
@@ -51,6 +51,6 @@ func server(svgchannel chan string) {
 </html>`)
 	})
 
-    fmt.Printf("Running on:\nhttp://localhost:%d\n", settings.port)
-    _ = http.ListenAndServe(fmt.Sprintf(":%d", settings.port), nil)
+	fmt.Printf("Running on:\nhttp://localhost:%d\n", settings.port)
+	_ = http.ListenAndServe(fmt.Sprintf(":%d", settings.port), nil)
 }
