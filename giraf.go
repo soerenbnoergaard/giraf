@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/csv"
+	"flag"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -81,9 +83,26 @@ func handler(datachannel chan float64, svgchannel chan string) {
 	}
 }
 
+func parseArgs() {
+	// column:     1,
+	// skiprows:   1,
+	// outputrate: 10 * time.Millisecond,
+	// port:       8080,
+
+	flag.IntVar(&settings.column, "y", 1, "")
+	flag.Uint64Var(&settings.skiprows, "s", 1, "")
+	flag.IntVar(&settings.port, "p", 8080, "")
+
+	flag.Parse()
+
+	fmt.Printf("%+v\n", settings)
+}
+
 // Main ////////////////////////////////////////////////////////////////////////
 
 func main() {
+	parseArgs()
+
 	reader := csv.NewReader(os.Stdin)
 	reader.ReuseRecord = true
 
