@@ -1,1 +1,4 @@
-giraf.pro.user
+fltk*
+release-*
+src/giraf
+src/giraf.exe
